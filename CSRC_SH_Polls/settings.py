@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import configparser
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,6 +28,19 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# ConfigParser instance
+config = configparser.ConfigParser()
+config.read('CSRC_SH_Polls/db_mysql.ini')
+
+# param in [database]
+db_host = config.get('database', 'host')
+db_port = config.get('database', 'port')
+db_username = config.get('database', 'username')
+db_password = config.get('database', 'password')
+db_name = config.get('database', 'db_name')
+
+# param in [settings]
+timezone = config.get('settings', 'timezone')
 
 # Application definition
 
@@ -77,8 +91,12 @@ WSGI_APPLICATION = 'CSRC_SH_Polls.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': db_name,
+        'USER': db_username,
+        'PASSWORD': db_password,
+        'HOST': db_host,
+        'PORT': db_port,
     }
 }
 
@@ -107,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = timezone
 
 USE_I18N = True
 
