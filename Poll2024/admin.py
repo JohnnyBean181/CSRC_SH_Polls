@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django import forms
+from django.contrib.auth.admin import UserAdmin
 from .models import Question, Choice, Employees, Departments, Titles
-from .models import DeptManager
+from .models import DeptManager, VoterTitles, Voters2024, Scales, Votes
+from .admin_form import TitleForm, EmployeeForm, DeptManagerForm
 
 
 #class ChoiceInline(admin.StackedInline):
@@ -21,26 +22,14 @@ class QuestionAdmin(admin.ModelAdmin):
 # Register your models here.
 # admin.site.register(Question, QuestionAdmin)
 
+@admin.register(Departments)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ['dept_name', 'created_date', 'location']
 
-admin.site.register(Departments, DepartmentAdmin)
-
-class TitleForm(forms.ModelForm):
-    class Meta:
-        model = Titles
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # 定制 emp_no 字段的显示
-        self.fields['emp_no'].queryset = Employees.objects.all()
-        self.fields['emp_no'].label_from_instance = lambda obj: f"{obj.emp_no} ({obj.last_name}{obj.first_name})"
-
 class TitleAdmin(admin.ModelAdmin):
     form = TitleForm
-
-admin.site.register(Titles, TitleAdmin)
+# don't display in production
+# admin.site.register(Titles, TitleAdmin)
 
 class DepartmentInline(admin.StackedInline):
     model = Departments
@@ -48,27 +37,12 @@ class DepartmentInline(admin.StackedInline):
 class TitleInline(admin.StackedInline):
     model = Titles
 
-class EmployeeForm(forms.ModelForm):
-    departments = forms.ModelMultipleChoiceField(
-        queryset=Departments.objects,
-        widget=forms.CheckboxSelectMultiple,  # 使用复选框
-        required=True # ,
-        #to_field_name= "dept_name"
-    )
-
-    class Meta:
-        model = Employees
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # 定制 emp_no 字段的显示
-        self.fields['departments'].label_from_instance = lambda obj: obj.dept_name
-
+@admin.register(Employees)
 class EmployeeAdmin(admin.ModelAdmin):
     inlines = [TitleInline]
     list_display = ['emp_no', 'get_fullname', 'get_departments', 'get_title']
     form = EmployeeForm
+    list_per_page = 15  # 设置每页显示的记录条数
 
     def get_fullname(self, obj):
         return f"{obj.last_name}{obj.first_name}"
@@ -105,24 +79,28 @@ class EmployeeAdmin(admin.ModelAdmin):
 
     get_title.short_description = "职级"
 
-
-admin.site.register(Employees, EmployeeAdmin)
-
-class DeptManagerForm(forms.ModelForm):
-
-    class Meta:
-        model = DeptManager
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # 定制 emp_no 字段的显示
-        self.fields['dept_no'].queryset = Departments.objects.all()
-        self.fields['dept_no'].label_from_instance = lambda obj: f"{obj.dept_no} ({obj.dept_name})"
-        self.fields['emp_no'].queryset = Employees.objects.all()
-        self.fields['emp_no'].label_from_instance = lambda obj: f"{obj.emp_no} ({obj.last_name}{obj.first_name})"
-
 class DeptManagerAdmin(admin.ModelAdmin):
     form = DeptManagerForm
+# don't display in production
+# admin.site.register(DeptManager, DeptManagerAdmin)
 
-admin.site.register(DeptManager, DeptManagerAdmin)
+admin.site.register(VoterTitles)
+
+@admin.register(Voters2024)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        ("Profile", {'fields': ('emp_no', 'voter_id', 'dept_no')}),
+        ("Status", {'fields': ('voted', 'valid_year')}),
+    )
+
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ("Profile", {'fields': ('emp_no', 'voter_id', 'dept_no')}),
+        ("Status", {'fields': ('voted', 'valid_year')}),
+    )
+
+admin.site.register(Scales)
+
+@admin.register(Votes)
+class VoteAdmin(admin.ModelAdmin):
+    list_display = ["voter", "emp_no", "scale"]
+    search_fields = ["voter__username"]

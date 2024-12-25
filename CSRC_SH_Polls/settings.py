@@ -85,6 +85,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'CSRC_SH_Polls.wsgi.application'
 
+AUTH_USER_MODEL = 'Poll2024.Voters2024'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
