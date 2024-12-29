@@ -1,0 +1,213 @@
+{% extends "base_bootstrap.html" %}
+{% block content %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'Poll2024/style.css' %}">
+
+
+    <form method="post">
+        {% csrf_token %}
+        <script type="text/javascript">
+            let count_y = {{ counter }};  // 处长优秀票数
+        </script>
+        <!-- rute block -->
+        <div style="font-size:20px">
+            <ul>
+                <li>本次民主评议按照18个处室开展。</li>
+                <li>填写优秀、称职、基本称职、不称职四个等次，其中出现<strong>基本称职</strong>和<strong>不称职</strong>等次的，需点击姓名、并添加<strong>详细说明理由</strong>。</li>
+                <li>优秀推荐名额共15个，需全部投完，未投完或超出均不能提交。</li>
+            </ul>
+        </div>
+        <!-- error block -->
+        {% if formset.non_form_errors %}
+            <div><span style="color: red; ">
+                {{ formset.non_form_errors }}</span>
+            </div>
+        {% endif %}
+        <!-- big table container -->
+        <table>
+            <tr>
+                <!-- notification block -->
+                <td colspan="6">
+                    <span style="font-size: large; ">目前已评选</span>
+                    <span style="font-size: large; " id="y_cz">?</span>
+                    <span style="font-size: large; ">位优秀领导干部</span>
+                </td>
+            </tr>
+            <tr>
+            {{ formset.management_form }} {% load filters %}
+                <!-- iterate through lines -->
+                {% for range in ranges %}
+                {% with iter=forloop.counter %}
+                    <!-- for the first row: name -->
+                    <table><tr>
+                    {% for i in range %}
+                        {% with form=formset|index:i%} <!-- form is current form -->
+                        {% if form.non_field_errors %} <!-- form doesn't exist -->
+                        <div class="form-errors">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        {% if forloop.first %}
+                            <!-- display column name -->
+                            <td class="bg_color4">姓名</td>
+                            <!-- display department name -->
+                            <td rowspan="4" class="bg_color1">{{ form.initial.dept_name }}</td>
+                        {% else  %}
+                            {% with form_prev=formset|previous:i%} <!-- form_prev is previous form -->
+                            <!-- if move on to new department -->
+                            {% if form.initial.dept_name != form_prev.initial.dept_name %}
+                                <!-- display department name -->
+                                <td rowspan="4" class="bg_color1">
+                                    {{ form.initial.dept_name }}
+                                </td>
+                            {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                            <!-- display candidate name -->
+                            <td class="bg_color2 emp_name_in_line_{{iter}}">
+                                {{ form.emp_name }}
+                                <!-- critical: claim fields which are required by the form,
+                                     but these fields are invisible to the client. -->
+                                <span style="display: none">{{ form.emp_no }} {{ form.dept_no }}</span>
+                            </td>
+
+                        {% endwith %}
+                    {% endfor %}
+                    </tr>
+                    <!-- for the second row: scale -->
+                    <tr>
+                    {% for i in range %}
+                        {% with form=formset|index:i%} <!-- form is current form -->
+                        {% if forloop.first %}
+                            <!-- display column name -->
+                            <td class="bg_color4">等次</td>
+                        {% endif %}
+                            <!-- display candidate name -->
+                            <td class="bg_color2">{{ form.scale }}</td>
+                        {% endwith %}
+                    {% endfor %}
+                    </tr>
+                    <!-- for the third row: comment -->
+                    <tr>
+                    {% for i in range %}
+                        {% with form=formset|index:i%} <!-- form is current form -->
+                        {% if forloop.first %}
+                            <!-- display column name -->
+                            <td id="line-{{iter}}-title" class="bg_color4" style="display:none">评议</td>
+                        {% endif %}
+                            <!-- display comment textfield -->
+                            <td class="bg_color2 no_display_{{iter}}" style="display:none">
+                                {{ form.comment }} <br/>
+                                <span class="font_comment"
+                                        onclick="hideCommentById('line-{{iter}}-title');
+                                        hideCommentByClassName('.bg_color2.no_display_{{iter}}');">
+                                    隐藏评议</span>
+                            </td>
+                        {% endwith %}
+                    {% endfor %}
+                    </tr>
+                    <!-- for the forth row: error info -->
+                    <tr>
+                    {% for i in range %}
+                        {% with form=formset|index:i%} <!-- form is current form -->
+                        {% if forloop.first %}
+                            <!-- display column name -->
+                            <td class="bg_color4" style="display:none">错误提示</td>
+                        {% endif %}
+                            <!-- display error info -->
+                            <td><span class="form-errors">{{ form.errors}}</span></td>
+                        {% endwith %}
+                    {% endfor %}
+                    </tr></table><p>
+                {% endwith %}
+                {% endfor %}
+        </table>
+        <button type="submit">提交</button>
+    </form>
+
+    <script type="text/javascript">
+        function showComment() {
+            alert("Employee input clicked!");
+        }
+        function showCommentById(id) {
+            document.getElementById(id).style.display = '';
+        }
+        function showCommentByClassName(classname) {
+            const elements = document.querySelectorAll(classname);
+            elements.forEach(function(element) {
+                element.style.display = '';
+            });
+        }
+        function hideCommentById(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        function hideCommentByClassName(classname) {
+            const elements = document.querySelectorAll(classname);
+            elements.forEach(function(element) {
+                element.style.display = 'none';
+            });
+        }
+        function updateScale (cand_id, oldVal, newVal) {
+            if (oldVal == 1) {
+                count_y -= 1;
+            }
+            if (newVal == 1) {
+                count_y += 1;
+            }
+            const count_element = document.getElementById('y_cz')
+            count_element.textContent = count_y;
+            if (count_y !== 1) {
+                count_element.style.color = "red";
+                $('button[type="submit"], input[type="submit"]').prop('disabled', true);
+            } else {
+                count_element.style.color = "black";
+                $('button[type="submit"], input[type="submit"]').prop('disabled', false);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const clickableInputs = document.querySelectorAll('.clickable-readonly-input');
+            clickableInputs.forEach(function(input) {
+                // set input element as brown color
+                input.style.color = "#504538"
+                // register onclick listen onto the element
+                input.addEventListener('click', function(event) {
+                    const parentTd = input.closest('td');
+                    const classList = parentTd.classList;
+                    const lastPart = classList[1].split('_').pop();
+                    showCommentById(`line-${lastPart}-title`);
+                    showCommentByClassName(`.bg_color2.no_display_${lastPart}`);
+                });
+            });
+        });
+        $(document).ready(function(){
+            // find all select elements
+            const selects = $("[id$='scale']");
+            selects.each(function(i, element) {
+                const select = $(element);
+                // store current value in "prev"
+                select.data("prev", select.val());
+                // register onclick
+                select.change(function(data){
+                    const jqThis = $(this);
+                    // retrieve id
+                    const cand_id = jqThis.attr("id").replace(/[^0-9]/ig,"")
+                    // call updateScale function
+                    updateScale (cand_id, jqThis.data("prev"), jqThis.val())
+                    jqThis.data("prev", jqThis.val());
+                });
+            });
+            // initialize submit button
+            const count_element = document.getElementById('y_cz')
+            count_element.innerHTML = count_y // fill value into html
+            if (count_y !== 15) {
+                count_element.style.color = "red";
+                $('button[type="submit"], input[type="submit"]').prop('disabled', true);
+            } else {
+                count_element.style.color = "red";
+            }
+
+        });
+    </script>
+
+{% endblock %}

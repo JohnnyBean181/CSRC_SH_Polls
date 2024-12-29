@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Question, Choice, Employees, Departments, Titles
 from .models import DeptManager, VoterTitles, Voters2024, Scales, Votes
-from .admin_form import TitleForm, EmployeeForm, DeptManagerForm
+from .admin_forms import TitleForm, EmployeeForm, DeptManagerForm
 
 
 #class ChoiceInline(admin.StackedInline):

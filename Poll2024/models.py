@@ -36,6 +36,7 @@ class Employees(models.Model):
     last_name = models.CharField(max_length=16)
     gender = models.CharField(max_length=1)
     hire_date = models.DateField(blank=True, null=True)
+    index_2024 = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -1,0 +1,11 @@
+<div width = "80%" align = "center" >
+
+{% load static %}
+<form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <img src="{% static 'Poll2024/images/thankyou.jpg' %}" alt="谢谢">
+    <p><input type="hidden" name="next" value="{% url 'homepage' %}">
+    <button type="submit" style="font-size: 16px;">退出系统</button></p>
+</form>
+
+</div>

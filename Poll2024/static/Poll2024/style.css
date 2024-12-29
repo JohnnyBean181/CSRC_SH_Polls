@@ -1,3 +1,51 @@
 li a {
     color: green;
 }
+
+.bg_color1 {
+    width:80px;
+    text-align: center;
+    background-color: #deb887;
+    color: #504538;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.bg_color2 {
+    background-color: #ffeccb;
+    text-align: center;
+    height:25px;
+}
+
+.bg_color3 {
+    background-color: #F5F5DC;
+    text-align: center;
+    width: 60px;
+    color: #F5F5DC;
+}
+
+.bg_color4 {
+    background-color: #ffeccb;
+    text-align: center;
+    width: 60px;
+    color: #504538;
+    font-size: 18px;
+}
+
+.centered-select option {
+    text-align: center;
+}
+
+.vertical_align {
+    vertical-align: middle;
+}
+
+.no_display {
+    display: none;
+}
+
+.font_comment {
+    font-size: small;
+    color: gray;
+    text-decoration: underline;
+}

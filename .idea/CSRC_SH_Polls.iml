@@ -25,6 +25,7 @@
       <list>
         <option value="$MODULE_DIR$/Poll2024/templates" />
         <option value="$MODULE_DIR$/templates" />
+        <option value="$MODULE_DIR$/Poll2024/templatetags" />
       </list>
     </option>
   </component>
