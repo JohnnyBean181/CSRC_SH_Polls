@@ -21,7 +21,9 @@ tutorial_url = [
 ]
 urlpatterns = [
     path("vote/", views.VoteCreateProxy.as_view(), name="vote_proxy"),
-    path("vote/divition_level/", views.VoteCreate.as_view(), name="vote_division_level"),
+    path("vote/divition_level/", views.VoteCreateDivision.as_view(), name="vote_division_level"),
+    path("vote/section_level/", views.VoteCreateSection.as_view(), name="vote_section_level"),
+
     path("logout/", views.Logout.as_view(), name="exit"),
 ]
 

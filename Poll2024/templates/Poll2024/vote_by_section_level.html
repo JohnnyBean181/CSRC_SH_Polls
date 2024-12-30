@@ -3,7 +3,6 @@
 {% load static %}
 
     <link rel="stylesheet" href="{% static 'Poll2024/style.css' %}">
-    <link rel="stylesheet" href="{% static 'Poll2024/container.css' %}">
     <!-- rule block -->
     <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -14,7 +13,6 @@
               </div>
               <div class="modal-body">
                 <ul>
-                    <li>本次民主评议按照18个处室开展。</li>
                     <li>填写优秀、称职、基本称职、不称职四个等次。</li>
                     <li>其中出现<strong>基本称职</strong>和<strong>不称职</strong>等次的，需点击姓名、并在姓名下方出现的文本框中<strong>详细说明理由</strong>。</li>
                         <ul>
@@ -22,7 +20,6 @@
                             <li>同一行中，其他姓名下方出现的文本框可以不用填写。</li>
                             <li>可以通过点击“隐藏评议”收起文本框。</li>
                         </ul>
-                    <li>优秀推荐名额共15个，需全部投完，未投完或超出均不能提交。</li>
                 </ul>
               </div>
               <div class="modal-footer">
@@ -33,11 +30,9 @@
     </div>
     <br>
     <div class="d-flex justify-content-center">
-        <h2>2024年度处级干部民主评议表</h2>
+        <h2>2024年度处级干部民主评议表({{ dept_name }})</h2>
     </div>
-    <script type="text/javascript">
-        let count_y = 0  // 优秀处长票数
-    </script>
+    <div>
     <!-- form start here -->
     <form method="post">
         {% csrf_token %}
@@ -49,13 +44,13 @@
             </div>
         {% endif %}
         <!-- big table container -->
-        <table>
+        <table style="margin: 0 auto;">
             {{ formset.management_form }}
 
             {% load filters %}
             <tr><td><div><font color="red"><h3>{{ formset.non_form_errors }}</h3></font></div></td></tr>
-                <!-- iterate through lines -->
-                {% for range in ranges %}
+                <!-- only one line -->
+
                 <tr><td>
                 {% with iter=forloop.counter %}
                     <!-- for the first row: name -->
@@ -65,20 +60,6 @@
                         {% if forloop.first %}
                             <!-- display column name -->
                             <td class="bg_color4">姓名</td>
-                            <!-- display department name -->
-                            <td rowspan="4" class="bg_color1">{{ form.dept_name.value }}
-                            </td>
-                        {% else  %}
-
-                            {% with form_prev=formset|previous:i%} <!-- form_prev is previous form -->
-                                <!-- if move on to new department -->
-                                {% if form.dept_name.value != form_prev.dept_name.value %}
-                                    <!-- display department name -->
-                                    <td rowspan="4" class="bg_color1">
-                                        {{ form.initial.dept_name }}
-                                    </td>
-                                {% endif %}
-                            {% endwith %}
                         {% endif %}
                             <!-- display candidate name -->
                             <td class="bg_color2 emp_name_in_line_{{iter}}">
@@ -87,7 +68,6 @@
                                      but these fields are invisible to the client. -->
                                 <span style="display: none">{{ form.emp_no }} {{ form.dept_no }}{{ form.dept_name }}</span>
                             </td>
-
                         {% endwith %}
                     {% endfor %}
                     </tr>
@@ -149,16 +129,6 @@
                     </table><p></p>
                     {% endwith %}
                 </td></tr>
-                {% endfor %}
-
-            <tr><td>
-                <!-- notification block -->
-                <div class="d-flex justify-content-center">
-                    <span style="font-size: large; ">目前已评选</span>
-                    <span style="font-size: large; " id="y_cz">?</span>
-                    <span style="font-size: large; ">位优秀领导干部</span>
-                </div></td>
-            </tr>
             <tr><td>
                 <div class="d-flex justify-content-center">
                     <button type="button" id="showModalBtn" class="btn btn-primary mt-3">显示注意事项</button>
@@ -169,7 +139,7 @@
         </table>
 
     </form>
-
+    </div>
     <script type="text/javascript">
         function showComment() {
             alert("Employee input clicked!");
@@ -192,23 +162,7 @@
                 element.style.display = 'none';
             });
         }
-        function updateScale (cand_id, oldVal, newVal) {
-            if (oldVal == 1) {
-                count_y -= 1;
-            }
-            if (newVal == 1) {
-                count_y += 1;
-            }
-            const count_element = document.getElementById('y_cz')
-            count_element.textContent = count_y;
-            if (count_y !== 15) {
-                count_element.style.color = "red";
-                $('button[type="submit"], input[type="submit"]').prop('disabled', true);
-            } else {
-                count_element.style.color = "black";
-                $('button[type="submit"], input[type="submit"]').prop('disabled', false);
-            }
-        }
+
 
         document.addEventListener('DOMContentLoaded', function() {
             const clickableInputs = document.querySelectorAll('.clickable-readonly-input');
@@ -242,26 +196,6 @@
                     jqThis.data("prev", jqThis.val());
                 });
             });
-        });
-
-        // initialize submit button
-
-        $(document).ready(function(){
-            count_y = 0;
-            const selects = $("[id$='scale']");
-            selects.each(function() {
-                if ($(this).val() === '1') {
-                    count_y++;
-                }
-            });
-            const count_element = document.getElementById('y_cz');
-            count_element.innerHTML = count_y; // fill value into html
-            if (count_y !== 15) {
-                count_element.style.color = "red";
-                $('button[type="submit"], input[type="submit"]').prop('disabled', true);
-            } else {
-                count_element.style.color = "black";
-            }
         });
 
         // 页面加载后一秒自动显示模态框

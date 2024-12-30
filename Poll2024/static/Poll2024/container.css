@@ -1,0 +1,6 @@
+.container, .container-fluid {
+    width: 100%;
+    max-width: none !important; /* 取消最大宽度限制 */
+    padding-left: 0; /* 如果需要，可以移除内边距 */
+    padding-right: 0;
+}
