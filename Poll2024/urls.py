@@ -23,6 +23,7 @@ urlpatterns = [
     path("vote/", views.VoteCreateProxy.as_view(), name="vote_proxy"),
     path("vote/divition_level/", views.VoteCreateDivision.as_view(), name="vote_division_level"),
     path("vote/section_level/", views.VoteCreateSection.as_view(), name="vote_section_level"),
+    path("vote/bureau_level/", views.VoteCreateBureau.as_view(), name="vote_bureau_level"),
 
     path("logout/", views.Logout.as_view(), name="exit"),
 ]

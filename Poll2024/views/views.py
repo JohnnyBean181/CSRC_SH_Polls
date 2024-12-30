@@ -1,4 +1,3 @@
-from django.core.exceptions import NON_FIELD_ERRORS
 from django.db.models import F, Prefetch
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -9,7 +8,7 @@ from django.views import View
 from Poll2024.forms import VanillaVoteForm
 from django.db import transaction
 
-def create_init_data():
+def create_init_data(limit):
     # retrieve candidate info., along with department info.
     candidates = (
         Employees.objects.prefetch_related(
@@ -34,7 +33,7 @@ def create_init_data():
             'scale': 2,  # set to "称职" as default
             'index': candidate.index_2024,
         }
-        for candidate in candidates[:76] # only pick division level
+        for candidate in candidates[:limit] # only pick division level
     ]
     return initial
 
@@ -75,6 +74,18 @@ def create_init_data_by_division_id(dept_no):
 
     return initial
 
+def create_ranges_for_bureau():
+    # ranges for each line
+    index_list = [(0, 9), (9, 17)]
+    ranges = [list(range(start, end)) for start, end in index_list]
+    return ranges
+
+def update_initial(initial):
+    for node in initial:
+        if node['emp_name'] == '金岸睿':
+            node['dept_name'] += '、党办'
+        if node['emp_name'] == '穆菁':
+            node['dept_name'] += '、公司三处'
 
 class VoteCreateProxy(LoginRequiredMixin, View):
     vote_by_division_level = reverse_lazy('Poll2024:vote_division_level')
@@ -91,8 +102,11 @@ class VoteCreateProxy(LoginRequiredMixin, View):
             return redirect(self.vote_by_division_level)
         elif voter.title_id.title_id == 3: # if voter is in bureau level
             return redirect(self.vote_by_section_level)
-        elif voter.title_id == 1: # if voter is in bureau level
+        elif voter.username == 'ardnxp': # if voter is bureau chief: Ling
             return redirect(self.vote_by_bureau_level)
+        # if voter is other bureau manager: Wang, He, or An.
+        elif voter.username in ['mcsznj', 'uhqtaf', 'pvqsxj']:
+            return redirect(self.vote_by_division_level)
 
 
 class VoteCreateDivision(LoginRequiredMixin, View):
@@ -101,7 +115,7 @@ class VoteCreateDivision(LoginRequiredMixin, View):
     success = reverse_lazy('Poll2024:exit')
 
     def get(self, request):
-        initial = create_init_data()
+        initial = create_init_data(76) # all division level
 
         # sort initial according to index
         sorted_initial = sorted(initial, key=lambda x: x['index'])
@@ -116,10 +130,9 @@ class VoteCreateDivision(LoginRequiredMixin, View):
         return render(request, self.template, ctx)
 
     def post(self, request):
-        # Assuming you're using a formset named VanillaVoteFormSet
         vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
 
-        initial = create_init_data()
+        initial = create_init_data(76)
         # Binding the POST data to the formset
         formset = vote_formset(initial=initial, data=request.POST)
 
@@ -186,7 +199,6 @@ class VoteCreateSection(LoginRequiredMixin, View):
         return render(request, self.template, ctx)
 
     def post(self, request):
-        # Assuming you're using a formset named VanillaVoteFormSet
         vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
 
         initial = create_init_data_by_division_id(request.user.dept_no.dept_no)
@@ -237,6 +249,75 @@ class VoteCreateSection(LoginRequiredMixin, View):
 
             ctx = {'formset': formset, 'range': r, 'dept_name': dept_name}
             return render(request, self.template, ctx)
+
+
+class VoteCreateBureau(LoginRequiredMixin, View):
+
+    template = 'Poll2024/vote_by_bureau_level.html'
+    success = reverse_lazy('Poll2024:exit')
+
+    def get(self, request):
+        initial = create_init_data(17) # all division leader
+        update_initial(initial)
+
+        # create formset for vote, and set up initial data
+        vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
+        formset = vote_formset(initial=initial)
+
+        ranges = create_ranges_for_bureau
+
+        ctx = {'formset': formset, 'ranges': ranges}
+        return render(request, self.template, ctx)
+
+    def post(self, request):
+        vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
+
+        initial = create_init_data(17) # all division leader
+        update_initial(initial)
+
+        # Binding the POST data to the formset
+        formset = vote_formset(initial=initial, data=request.POST)
+
+        if formset.is_valid():
+            # retrieve all candidates and scales
+            candidates = Employees.objects.all()
+            scales = Scales.objects.all()
+
+            # Create dictionaries for quick lookup
+            candidate_dict = {candidate.emp_no: candidate for candidate in candidates}
+            scale_dict = {scale.scale_id: scale for scale in scales}
+
+            # Process the valid data
+            # set user as voted
+            request.user.voted = True
+            # create vote formset
+            votes = []
+            for form in formset:
+                emp_id = form.cleaned_data['emp_no']
+                candidate = candidate_dict.get(emp_id)
+
+                scale_id = int(form.cleaned_data['scale'])
+                scale = scale_dict.get(scale_id)
+
+                v = Votes(
+                    voter=request.user,
+                    emp_no=candidate,
+                    scale=scale,
+                    comment=form.cleaned_data['comment'],
+                )
+                votes.append(v)
+
+            with transaction.atomic():
+                Votes.objects.bulk_create(votes)
+                request.user.save()
+                return redirect(self.success)
+
+        else:
+            ranges = create_ranges_for_bureau
+
+            ctx = {'formset': formset, 'ranges': ranges}
+            return render(request, self.template, ctx)
+
 
 class Logout(LoginRequiredMixin, View):
 

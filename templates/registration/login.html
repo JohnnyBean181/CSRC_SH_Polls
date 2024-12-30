@@ -1,10 +1,13 @@
 {% extends "base_bootstrap.html" %}
 
 {% block content %}
-<div width="80%" align="center">
-    {% load static %}
-    <img src="{% static 'Poll2024/images/login.png' %}" alt="登录">
-    <form method="post" action="{% url 'login' %}">
+{% load static %}
+<link rel="stylesheet" href="{% static 'Poll2024/login.css' %}">
+
+<div class="background-container" style="background-image: url('{% static 'Poll2024/images/login.jpeg' %}'); background-size: cover;">
+    <form class="form-container" method="post" action="{% url 'login' %}">
+        <h3>欢迎登录</h3>
+        <br>
         {% csrf_token %}
         {{ form.as_p }}
 
@@ -12,16 +15,16 @@
         <input type="hidden" name="next" value="{{ next }}" />
     </form>
 </div>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            const labelElements = document.getElementsByTagName('label');
-            for(let i = 0; i < labelElements.length; i++) {
-                // 检查当前label的for属性是否为'id_username'
-                if(labelElements[i].getAttribute('for') === 'id_username') {
-                    // 如果是，则将其innerText改为'name'
-                    labelElements[i].innerText = '账号';
-                }
+<script type="text/javascript">
+    $(document).ready(function(){
+        const labelElements = document.getElementsByTagName('label');
+        for(let i = 0; i < labelElements.length; i++) {
+            // 检查当前label的for属性是否为'id_username'
+            if(labelElements[i].getAttribute('for') === 'id_username') {
+                // 如果是，则将其innerText改为'name'
+                labelElements[i].innerText = '账号:';
             }
-        });
-    </script>
+        }
+    });
+</script>
 {% endblock %}

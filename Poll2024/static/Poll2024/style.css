@@ -60,10 +60,8 @@ li a {
             padding: 15px;
             z-index: 1000;
             display: none;
-        }
+}
 
 .custom-alert button {
     margin-top: 10px;
 }
-
-

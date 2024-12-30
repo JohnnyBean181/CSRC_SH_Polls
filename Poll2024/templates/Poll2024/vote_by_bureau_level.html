@@ -1,0 +1,231 @@
+{% extends "base_bootstrap.html" %}
+{% block content %}
+{% load static %}
+
+    <link rel="stylesheet" href="{% static 'Poll2024/style.css' %}">
+    <link rel="stylesheet" href="{% static 'Poll2024/container.css' %}">
+    <!-- rule block -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">注意事项</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <ul>
+                    <li>填写优秀、称职、基本称职、不称职四个等次。</li>
+                    <li>其中出现<strong>基本称职</strong>和<strong>不称职</strong>等次的，需点击姓名、并在姓名下方出现的文本框中<strong>详细说明理由</strong>。</li>
+                        <ul>
+                            <li>理由不得少于4个字。</li>
+                            <li>同一行中，其他姓名下方出现的文本框可以不用填写。</li>
+                            <li>可以通过点击“隐藏评议”收起文本框。</li>
+                        </ul>
+                </ul>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">确认</button>
+              </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="d-flex justify-content-center">
+        <h2>2024年度处级干部民主评议表</h2>
+    </div>
+    <div>
+    <!-- form start here -->
+    <form method="post">
+        {% csrf_token %}
+        <!-- error block -->
+        {% if formset.non_form_errors %}
+            <div><span style="color: red; ">
+                {{ formset.non_form_errors }}</span>
+            </div>
+        {% endif %}
+        <!-- big table container -->
+        <table style="margin: 0 auto;">
+            {{ formset.management_form }}
+            {% load filters %}
+            <tr><td><div><font color="red"><h3>{{ formset.non_form_errors }}</h3></font></div></td></tr>
+                <!-- only one line -->
+                {% for range in ranges %}
+                <tr><td>
+                {% with iter=forloop.counter %}
+                    <!-- for the first row: department name -->
+                    <table>
+                        <tr class="vertical_align">
+                            {% for i in range %}
+                                {% with form=formset|index:i%} <!-- form is current form -->
+                                    {% if forloop.first %}
+                                        <!-- display column name -->
+                                        <td class="bg_color4">处室</td>
+                                    {% endif %}
+                                    <!-- display department name -->
+                                    <td id='dept_name_in_line_{{iter}}' class="bg_color1">
+                                        {{form.dept_name.value}}
+                                    </td>
+                                {% endwith %}
+                            {% endfor %}
+                        </tr>
+                        <!-- for the second row: name -->
+                        <tr>
+                        {% for i in range %}
+                            {% with form=formset|index:i%} <!-- form is current form -->
+                            {% if forloop.first %}
+                                <!-- display column name -->
+                                <td class="bg_color4">姓名</td>
+                            {% endif %}
+                                <!-- display candidate name -->
+                                <td class="bg_color2 emp_name_in_line_{{iter}}">
+                                    {{ form.emp_name }}
+                                    <!-- critical: claim fields which are required by the form,
+                                        but these fields are invisible to the client. -->
+                                    <span style="display: none">{{ form.emp_no }} {{ form.dept_no }}{{ form.dept_name }}</span>
+                                </td>
+                            {% endwith %}
+                        {% endfor %}
+                        </tr>
+                        <!-- for the third row: scale -->
+                        <tr>
+                        {% for i in range %}
+                            {% with form=formset|index:i%} <!-- form is current form -->
+                            {% if forloop.first %}
+                                <!-- display column name -->
+                                <td class="bg_color4">等次</td>
+                            {% endif %}
+                                <!-- display candidate name -->
+                                <td class="bg_color2">{{ form.scale }}</td>
+                            {% endwith %}
+                        {% endfor %}
+                        </tr>
+                        <!-- for the forth row: comment -->
+                        <tr>
+                        {% for i in range %}
+                            {% with form=formset|index:i%} <!-- form is current form -->
+                            {% if forloop.first %}
+                                <!-- display column name -->
+                                <td id="line-{{iter}}-title" class="bg_color4" style="display:none">评议</td>
+                            {% endif %}
+                                <!-- display comment textfield -->
+                                <td class="bg_color2 no_display_{{iter}}" style="display:none">
+                                    {{ form.comment }} <br/>
+                                    <span class="font_comment"
+                                            onclick="hideCommentById('line-{{iter}}-title');
+                                            hideCommentByClassName('.bg_color2.no_display_{{iter}}');">
+                                        隐藏评议</span>
+                                </td>
+                            {% endwith %}
+                        {% endfor %}
+                        </tr>
+                        <!-- for the fifth row: error info -->
+                        <tr>
+                        {% with has_errors=formset|has_errors:range %}
+                            {% for i in range %}
+                                {% with form=formset|index:i%} <!-- form is current form -->
+                                    {% if forloop.first %}
+                                        <!-- display column name -->
+                                        {% if has_errors %}
+                                            <td class="bg_color4"></td>
+                                        {%  else %}
+                                            <td class="bg_color4" style="display:none"></td>
+                                        {% endif %}
+                                    {% endif %}
+                                    <!-- display error info -->
+                                    {% if has_errors %}
+                                        <td class="bg_color2"><span class="form-errors">{{form.comment.errors}}</span></td>
+                                    {%  else %}
+                                        <td class="bg_color2" style="display:none"></td>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endfor %}
+                        {% endwith %}
+                        </tr>
+                    </table><p></p>
+                    {% endwith %}
+                </td></tr>
+                {% endfor %}
+            <tr><td>
+                <div class="d-flex justify-content-center">
+                    <button type="button" id="showModalBtn" class="btn btn-primary mt-3">显示注意事项</button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button type="submit" class="btn btn-primary mt-3">提交</button>
+                </div></td>
+            </tr>
+        </table>
+
+    </form>
+    </div>
+    <script type="text/javascript">
+        function showComment() {
+            alert("Employee input clicked!");
+        }
+        function showCommentById(id) {
+            document.getElementById(id).style.display = '';
+        }
+        function showCommentByClassName(classname) {
+            const elements = document.querySelectorAll(classname);
+            elements.forEach(function(element) {
+                element.style.display = '';
+            });
+        }
+        function hideCommentById(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        function hideCommentByClassName(classname) {
+            const elements = document.querySelectorAll(classname);
+            elements.forEach(function(element) {
+                element.style.display = 'none';
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const clickableInputs = document.querySelectorAll('.clickable-readonly-input');
+            clickableInputs.forEach(function(input) {
+                // set input element as brown color
+                input.style.color = "#504538"
+                // register onclick listen onto the element
+                input.addEventListener('click', function(event) {
+                    const parentTd = input.closest('td');
+                    const classList = parentTd.classList;
+                    const lastPart = classList[1].split('_').pop();
+                    showCommentById(`line-${lastPart}-title`);
+                    showCommentByClassName(`.bg_color2.no_display_${lastPart}`);
+                });
+            });
+        });
+        $(document).ready(function(){
+            // find all select elements
+            const selects = $("[id$='scale']");
+            selects.each(function(i, element) {
+                const select = $(element);
+                // store current value in "prev"
+                select.data("prev", select.val());
+                // register onclick
+                select.change(function(data){
+                    const jqThis = $(this);
+                    // retrieve id
+                    const cand_id = jqThis.attr("id").replace(/[^0-9]/ig,"")
+                    // call updateScale function
+                    updateScale (cand_id, jqThis.data("prev"), jqThis.val())
+                    jqThis.data("prev", jqThis.val());
+                });
+            });
+        });
+
+        // 页面加载后一秒自动显示模态框
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('#myModal').modal('show');
+            }, 100);
+        });
+
+        // 为按钮添加点击事件，重新显示模态框
+        $('#showModalBtn').click(function() {
+            $('#myModal').modal('show');
+        });
+
+    </script>
+
+{% endblock %}
