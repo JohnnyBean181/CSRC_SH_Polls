@@ -31,6 +31,7 @@ class VanillaVoteForm(forms.Form):
     }
 
     dept_no = forms.IntegerField()
+    dept_name = forms.CharField()
     emp_no = forms.IntegerField()
     emp_name = forms.CharField()
     emp_name.widget = forms.TextInput(attrs=my_attrs)
@@ -44,6 +45,7 @@ class VanillaVoteForm(forms.Form):
             'label': "评论",  #
             'cols': 10,
             'rows': 3,
+            'placeholder': "至少4字",
         })
     )
 
@@ -60,7 +62,10 @@ class VanillaVoteForm(forms.Form):
 
         # '不称职' or '基本称职'.
         if scale_value >= 3 and len(comment.strip()) < 4:
-            self.add_error('comment', "需详细说明理由，至少4个字。")
+            self.add_error('comment', "字数太少。")
+
+        if len(comment.strip()) > 49:
+            self.add_error('comment', "字数太多。")
 
         return cleaned_data  # Always return the cleaned data, whether it has errors or not.
 

@@ -1,9 +1,10 @@
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.db.models import F, Prefetch
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from Poll2024.models import Employees, Votes, Departments, DeptManager, Scales
+from Poll2024.models import Employees, Votes, DeptManager, Scales
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.forms import modelformset_factory, formset_factory
+from django.forms import formset_factory
 from django.views import View
 from Poll2024.forms import VanillaVoteForm
 from django.db import transaction
@@ -33,7 +34,7 @@ def create_init_data():
             'scale': 2,  # set to "称职" as default
             'index': candidate.index_2024,
         }
-        for candidate in candidates
+        for candidate in candidates[:76] # only pick division level
     ]
     return initial
 
@@ -44,13 +45,29 @@ def create_ranges():
     return ranges
 
 
-class VotationCreate(LoginRequiredMixin, View):
-
-    template = 'Poll2024/mainpage.html'
+class VoteCreateProxy(LoginRequiredMixin, View):
+    template = reverse_lazy('Poll2024:vote_division_level')
     success = reverse_lazy('Poll2024:exit')
 
     def get(self, request):
         voter = request.user
+        if voter.voted: # if voter already voted
+            return redirect(self.success)
+        if voter.title_id.title_id == 2: # if voter is in division level
+            # redirect to vote_by_division_level.html
+            return redirect(self.template)
+        elif voter.title_id == 1: # if voter is in bureau level
+            pass
+        elif voter.title_id == 3: # if voter is in bureau level
+            pass
+
+
+class VoteCreate(LoginRequiredMixin, View):
+
+    template = 'Poll2024/vote_by_division_level.html'
+    success = reverse_lazy('Poll2024:exit')
+
+    def get(self, request):
         initial = create_init_data()
 
         # sort initial according to index
@@ -85,6 +102,9 @@ class VotationCreate(LoginRequiredMixin, View):
             scale_dict = {scale.scale_id: scale for scale in scales}
 
             # Process the valid data
+            # set user as voted
+            request.user.voted = True
+            # create vote formset
             votes = []
             for form in formset:
                 emp_id = form.cleaned_data['emp_no']
@@ -103,8 +123,8 @@ class VotationCreate(LoginRequiredMixin, View):
 
             with transaction.atomic():
                 Votes.objects.bulk_create(votes)
-            # Redirect after successful processing to prevent double submission
-            return redirect(self.success)
+                request.user.save()
+                return redirect(self.success)
 
         else:
             ranges = create_ranges()
@@ -112,7 +132,7 @@ class VotationCreate(LoginRequiredMixin, View):
             ctx = {'formset': formset, 'ranges': ranges}
             return render(request, self.template, ctx)
 
-class Exit(LoginRequiredMixin, View):
+class Logout(LoginRequiredMixin, View):
 
     def get(self, request):
 

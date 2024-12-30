@@ -106,7 +106,7 @@ class VoterTitles(models.Model):
 
 class Voters2024(AbstractUser):
     emp_no = models.ForeignKey('Employees', on_delete=models.CASCADE, db_column='emp_no', blank=True, null=True)
-    voter_id = models.ForeignKey('VoterTitles', on_delete=models.CASCADE, db_column='title_id', blank=True, null=True)
+    title_id = models.ForeignKey('VoterTitles', on_delete=models.CASCADE, db_column='title_id', blank=True, null=True)
     dept_no = models.ForeignKey('Departments', on_delete=models.CASCADE, db_column='dept_no', blank=True, null=True)
     voted = models.BooleanField(default=False)
     valid_year = models.IntegerField(default=2024)

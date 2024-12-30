@@ -7,6 +7,7 @@ app_name = "Poll2024"
 
 # these urls come from the tutorial, they're not used anymore.
 tutorial_url = [
+    #path("main", views.index, name="index"),
     path("main/", t_views.IndexView.as_view(), name="index"),
     # ex: /poll2024/5/
     #path("<int:question_id>/", views.detail, name="detail"),
@@ -19,9 +20,9 @@ tutorial_url = [
     path("<int:question_id>/vote/", t_views.vote, name="vote"),
 ]
 urlpatterns = [
-    #path("", views.index, name="index"),
-    path("vote/divition_level/", views.VotationCreate.as_view(), name="vote_division_level"),
-    path("exit/", views.Exit.as_view(), name="exit"),
+    path("vote/", views.VoteCreateProxy.as_view(), name="vote_proxy"),
+    path("vote/divition_level/", views.VoteCreate.as_view(), name="vote_division_level"),
+    path("logout/", views.Logout.as_view(), name="exit"),
 ]
 
 # uncomment following line to reintroduce urls from the tutorial.

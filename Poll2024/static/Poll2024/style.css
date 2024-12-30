@@ -49,3 +49,26 @@ li a {
     color: gray;
     text-decoration: underline;
 }
+
+.custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            z-index: 1000;
+            display: none;
+        }
+
+.custom-alert button {
+    margin-top: 10px;
+}
+
+.container, .container-fluid {
+    width: 100%;
+    max-width: none !important; /* 取消最大宽度限制 */
+    padding-left: 0; /* 如果需要，可以移除内边距 */
+    padding-right: 0;
+}

@@ -15,3 +15,12 @@ def previous(value, i):
         return value[int(i) - 1]  # 索引 i-1
     except (IndexError, ValueError, TypeError):
         return None
+
+@register.filter
+def has_errors(formset, range):
+    try:
+        forms_in_range = [formset[i] for i in range ]
+        has_errors = any(form.errors for form in forms_in_range)
+        return has_errors
+    except (IndexError, ValueError, TypeError):
+        return None
