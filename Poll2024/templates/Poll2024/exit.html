@@ -9,7 +9,7 @@
 
 <form method="post" action="{% url 'logout' %}">
     {% csrf_token %}
-    <img src="{% static 'Poll2024/images/thankyou.PNG' %}" alt="谢谢">
+    <img src="{% static 'Poll2024/images/thankyou.jpg' %}" alt="谢谢">
     <p><input type="hidden" name="next" value="{% url 'homepage' %}">
     <button type="submit" class="btn btn-primary mt-3">退出账号</button></p>
 </form>
