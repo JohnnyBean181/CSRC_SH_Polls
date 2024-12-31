@@ -81,12 +81,21 @@
                             {% endwith %}
                         {% endif %}
                             <!-- display candidate name -->
-                            <td class="bg_color2 emp_name_in_line_{{iter}}">
-                                {{ form.emp_name }}
-                                <!-- critical: claim fields which are required by the form,
-                                     but these fields are invisible to the client. -->
-                                <span style="display: none">{{ form.emp_no }} {{ form.dept_no }}{{ form.dept_name }}</span>
-                            </td>
+                            {% if form.emp_no.value != 17 %}
+                                <td class="bg_color2 emp_name_in_line_{{iter}} clickable-readonly-input">
+                                    {{ form.emp_name.value|linebreaksbr }}
+                                    <!-- critical: claim fields which are required by the form,
+                                         but these fields are invisible to the client. -->
+                                    <span style="display: none">{{ form.emp_no }} {{ form.dept_no }}{{ form.dept_name }}</span>
+                                </td>
+                            {% else %}
+                                <td class="bg_color2 emp_name_in_line_{{iter}} clickable-readonly-input special">
+                                    {{ form.emp_name.value|linebreaksbr }}
+                                    <!-- critical: claim fields which are required by the form,
+                                         but these fields are invisible to the client. -->
+                                    <span style="display: none">{{ form.emp_no }} {{ form.dept_no }}{{ form.dept_name }}</span>
+                                </td>
+                            {% endif %}
 
                         {% endwith %}
                     {% endfor %}

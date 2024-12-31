@@ -25,7 +25,3 @@ def has_errors(formset, range):
     except (IndexError, ValueError, TypeError):
         return None
 
-@register.filter
-def safe(original_string):
-    formatted_string = original_string.replace("\n", "<br>")
-    return formatted_string

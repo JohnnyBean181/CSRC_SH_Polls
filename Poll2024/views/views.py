@@ -43,6 +43,13 @@ def create_ranges():
     ranges = [list(range(start, end)) for start, end in index_list]
     return ranges
 
+def update_initial_for_division(initial):
+    for node in initial:
+        if node['emp_name'] == '金岸睿':
+            node['emp_name'] += '\n（兼党办）'
+        if node['emp_name'] == '穆菁':
+            node['emp_name'] += '\n（兼公司三处）'
+
 def create_init_data_by_division_id(dept_no):
     # retrieve candidate info., along with department info.
     candidates = (
@@ -80,7 +87,7 @@ def create_ranges_for_bureau():
     ranges = [list(range(start, end)) for start, end in index_list]
     return ranges
 
-def update_initial(initial):
+def update_initial_for_bureau(initial):
     for node in initial:
         if node['emp_name'] == '金岸睿':
             node['dept_name'] += '、党办'
@@ -116,6 +123,7 @@ class VoteCreateDivision(LoginRequiredMixin, View):
 
     def get(self, request):
         initial = create_init_data(76) # all division level
+        update_initial_for_division(initial)
 
         # sort initial according to index
         sorted_initial = sorted(initial, key=lambda x: x['index'])
@@ -133,6 +141,7 @@ class VoteCreateDivision(LoginRequiredMixin, View):
         vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
 
         initial = create_init_data(76)
+        update_initial_for_division(initial)
         # Binding the POST data to the formset
         formset = vote_formset(initial=initial, data=request.POST)
 
@@ -258,7 +267,7 @@ class VoteCreateBureau(LoginRequiredMixin, View):
 
     def get(self, request):
         initial = create_init_data(17) # all division leader
-        update_initial(initial)
+        update_initial_for_bureau(initial)
 
         # create formset for vote, and set up initial data
         vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
@@ -273,7 +282,7 @@ class VoteCreateBureau(LoginRequiredMixin, View):
         vote_formset = formset_factory(form=VanillaVoteForm, extra=0)
 
         initial = create_init_data(17) # all division leader
-        update_initial(initial)
+        update_initial_for_bureau(initial)
 
         # Binding the POST data to the formset
         formset = vote_formset(initial=initial, data=request.POST)

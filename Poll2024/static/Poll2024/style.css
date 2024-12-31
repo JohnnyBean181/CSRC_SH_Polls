@@ -65,3 +65,17 @@ li a {
 .custom-alert button {
     margin-top: 10px;
 }
+
+.clickable-readonly-input {
+    font-size: 18px;
+    height: 45px;
+    width: 100px;
+    font-family: "仿宋";
+}
+
+.special {
+    font-size: 18px;
+    height: 45px;
+    width: 140px;
+    font-family: "仿宋";
+}
