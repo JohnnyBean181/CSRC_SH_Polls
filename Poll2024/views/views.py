@@ -90,9 +90,9 @@ def create_ranges_for_bureau():
 def update_initial_for_bureau(initial):
     for node in initial:
         if node['emp_name'] == '金岸睿':
-            node['dept_name'] += '、党办'
+            node['dept_name'] += '\n党办'
         if node['emp_name'] == '穆菁':
-            node['dept_name'] += '、公司三处'
+            node['dept_name'] += '\n公司三处'
 
 class VoteCreateProxy(LoginRequiredMixin, View):
     vote_by_division_level = reverse_lazy('Poll2024:vote_division_level')

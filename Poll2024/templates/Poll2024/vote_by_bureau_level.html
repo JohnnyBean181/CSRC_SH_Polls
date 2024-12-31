@@ -21,6 +21,7 @@
                             <li>同一行中，其他姓名下方出现的文本框可以不用填写。</li>
                             <li>可以通过点击“隐藏评议”收起文本框。</li>
                         </ul>
+                    <li>优秀推荐名额共15个，超出限额则不能提交。</li>
                 </ul>
               </div>
               <div class="modal-footer">
@@ -33,6 +34,9 @@
     <div class="d-flex justify-content-center">
         <h2>2024年度处级干部民主评议表</h2>
     </div>
+    <script type="text/javascript">
+        let count_y = 0  // 优秀处长票数
+    </script>
     <div>
     <!-- form start here -->
     <form method="post">
@@ -63,7 +67,7 @@
                                     {% endif %}
                                     <!-- display department name -->
                                     <td id='dept_name_in_line_{{iter}}' class="bg_color1">
-                                        {{form.dept_name.value}}
+                                        {{form.dept_name.value|linebreaksbr}}
                                     </td>
                                 {% endwith %}
                             {% endfor %}
@@ -146,6 +150,15 @@
                 </td></tr>
                 {% endfor %}
             <tr><td>
+                <!-- notification block -->
+                <div class="d-flex justify-content-center">
+                    <span style="font-size: large; ">目前已评选</span>
+                    <span style="font-size: large; " id="y_cz">?</span>
+                    <span style="font-size: large; ">位优秀领导干部</span>
+                </div></td>
+            </tr>
+
+            <tr><td>
                 <div class="d-flex justify-content-center">
                     <button type="button" id="showModalBtn" class="btn btn-primary mt-3">显示注意事项</button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -178,7 +191,23 @@
                 element.style.display = 'none';
             });
         }
-
+        function updateScale (cand_id, oldVal, newVal) {
+            if (oldVal == 1) {
+                count_y -= 1;
+            }
+            if (newVal == 1) {
+                count_y += 1;
+            }
+            const count_element = document.getElementById('y_cz')
+            count_element.textContent = count_y;
+            if (count_y > 15) {
+                count_element.style.color = "red";
+                $('button[type="submit"], input[type="submit"]').prop('disabled', true);
+            } else {
+                count_element.style.color = "black";
+                $('button[type="submit"], input[type="submit"]').prop('disabled', false);
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const clickableInputs = document.querySelectorAll('.clickable-readonly-input');
@@ -213,7 +242,25 @@
                 });
             });
         });
+        // initialize submit button
 
+        $(document).ready(function(){
+            count_y = 0;
+            const selects = $("[id$='scale']");
+            selects.each(function() {
+                if ($(this).val() === '1') {
+                    count_y++;
+                }
+            });
+            const count_element = document.getElementById('y_cz');
+            count_element.innerHTML = count_y; // fill value into html
+            if (count_y > 15) {
+                count_element.style.color = "red";
+                $('button[type="submit"], input[type="submit"]').prop('disabled', true);
+            } else {
+                count_element.style.color = "black";
+            }
+        });
         // 页面加载后一秒自动显示模态框
         $(document).ready(function() {
             setTimeout(function() {
